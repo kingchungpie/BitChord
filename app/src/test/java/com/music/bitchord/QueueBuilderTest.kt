@@ -155,6 +155,31 @@ class QueueBuilderTest {
     }
 
     @Test
+    fun `a traditional upload is the same recording as its simplified one`() {
+        assertTrue(
+            QueueBuilder.isSameRecording(
+                song("aaa", "理性与任性之间", "李荣浩"),
+                song("bbb", "理性與任性之間", "李榮浩"),
+            ),
+        )
+    }
+
+    @Test
+    fun `autoplay drops a same-name track written in the other script`() {
+        val seed = song("seed", "理性与任性之间", "李荣浩")
+        val extra = QueueBuilder.extend(
+            existing = listOf(seed),
+            candidates = listOf(
+                song("v1", "理性與任性之間", "另一个上传者"),
+                song("v2", "老街", "李荣浩"),
+            ),
+            limit = 10,
+            excludedTitles = setOf(seed.title),
+        )
+        assertEquals(listOf("v2"), extra.map { it.videoId })
+    }
+
+    @Test
     fun `a name is compared without its qualifiers`() {
         assertEquals("a", QueueBuilder.baseTitle("A (Official Video)"))
         assertEquals("a", QueueBuilder.baseTitle("A (Slowed + Reverb)"))

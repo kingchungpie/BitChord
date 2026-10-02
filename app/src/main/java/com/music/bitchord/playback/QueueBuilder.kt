@@ -106,8 +106,14 @@ object QueueBuilder {
      * `Kesariya (From "Brahmastra") | Official Video` and `Kesariya` are one
      * recording as far as a queue is concerned. Remix and cover markers are
      * deliberately left in — those really are different tracks.
+     *
+     * Han text is folded to one script first ([HanVariants]): a mainland release
+     * billed in Simplified characters and the Taiwanese one of the same track
+     * billed in Traditional are one recording, and no other rule here can see
+     * that.
      */
-    internal fun normalisedTitle(raw: String): String = raw.lowercase(Locale.ROOT)
+    internal fun normalisedTitle(raw: String): String = HanVariants.fold(raw)
+        .lowercase(Locale.ROOT)
         .substringBefore(" | ")
         .replace(NOISE, " ")
         .replace(PUNCTUATION, " ")
@@ -116,7 +122,8 @@ object QueueBuilder {
 
     /**
      * [normalisedTitle] with every qualifier taken off, so `A`, `A (Live)` and
-     * `A (Slowed + Reverb)` all answer to `a`.
+     * `A (Slowed + Reverb)` all answer to `a`. Han text is folded here too, so a
+     * name written either way round is one name.
      *
      * [normalisedTitle] keeps those markers on purpose: a remix is a different
      * recording worth queueing in its own right. This is the blunter comparison
@@ -127,7 +134,8 @@ object QueueBuilder {
     internal fun baseTitle(raw: String): String = normalisedTitle(raw.replace(BRACKETED, " "))
 
     /** The cast behind a credit, split out so billing order stops mattering. */
-    internal fun artistSet(raw: String): Set<String> = raw.lowercase(Locale.ROOT)
+    internal fun artistSet(raw: String): Set<String> = HanVariants.fold(raw)
+        .lowercase(Locale.ROOT)
         .replace(TOPIC, " ")
         .split(",", "&", "·", "•", ";", " feat", " ft.", " ft ", " x ", " with ")
         .map { it.replace(PUNCTUATION, " ").replace(SPACES, " ").trim() }
